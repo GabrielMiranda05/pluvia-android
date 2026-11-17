@@ -1,0 +1,54 @@
+# ============================================================
+# Android / Gradle — build outputs (em qualquer subpasta)
+# ============================================================
+build/
+.gradle/
+*.iml
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Generated files
+bin/
+gen/
+out/
+release/
+
+# Gradle wrapper (manter os arquivos necessários)
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Proguard
+proguard/
+
+# Android Studio / IntelliJ
+.idea/
+*.iws
+*.ipr
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystore — nunca versionar chaves de assinatura
+*.jks
+*.keystore
+
+# Google / Firebase
+google-services.json
+.firebase/
+firebase-debug.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Kotlin
+*.class
+*.kotlin_module
+
+# Logs
+*.log
