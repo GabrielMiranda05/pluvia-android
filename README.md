@@ -156,8 +156,8 @@ Como o backend de IA ainda está em desenvolvimento, o app utiliza uma camada de
 
 | E-mail | Senha |
 |--------|-------|
-| `joao.pereira@windfyr.com.br` | `123456` |
-| `maria.silva@windfyr.com.br` | `123456` |
+| `joao.pereira@pluvia.com.br` | `123456` |
+| `maria.silva@pluvia.com.br` | `123456` |
 
 ---
 

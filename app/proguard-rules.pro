@@ -1,1 +1,1 @@
--keep class br.com.windfyr.data.model.** { *; }
+-keep class br.com.pluvia.data.model.** { *; }

@@ -53,7 +53,7 @@ object MockDataStore {
     private const val KEY_NEXT_TERRAIN_ID = "mock_next_terrain_id"
 
     fun init(context: Context) {
-        prefs = context.getSharedPreferences("windfyr_mock", Context.MODE_PRIVATE)
+        prefs = context.getSharedPreferences("pluvia_mock", Context.MODE_PRIVATE)
         loadFromPrefs()
         seedDefaultDataIfEmpty()
     }
@@ -93,8 +93,8 @@ object MockDataStore {
 
     private fun seedDefaultDataIfEmpty() {
         if (users.isEmpty()) {
-            users.add(MockUser(1, "João Pereira", "joao.pereira@windfyr.com.br", "123456", "JP"))
-            users.add(MockUser(2, "Maria Silva", "maria.silva@windfyr.com.br", "123456", "MS"))
+            users.add(MockUser(1, "João Pereira", "joao.pereira@pluvia.com.br", "123456", "JP"))
+            users.add(MockUser(2, "Maria Silva", "maria.silva@pluvia.com.br", "123456", "MS"))
         }
 
         if (terrains.isEmpty()) {
