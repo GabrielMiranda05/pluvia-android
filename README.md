@@ -20,6 +20,9 @@ O **Pluvia** é um aplicativo Android nativo desenvolvido como projeto de **Glob
 
 O tema escolhido para esta edição da Global Solution foi a **utilização de Inteligência Artificial para monitorar, prevenir e reduzir incêndios em terrenos rurais**. O Pluvia representa a camada mobile dessa solução, permitindo que produtores rurais acompanhem em tempo real as condições climáticas de seus terrenos, recebam alertas de risco de incêndio e gerenciem sistemas de irrigação inteligente.
 
+Link video pitch:
+https://youtu.be/Z_FdS5WcpW0
+
 ---
 
 ## 🎯 Problema & Solução
