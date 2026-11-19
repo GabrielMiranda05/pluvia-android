@@ -84,6 +84,10 @@ fun EditTerrainScreen(
         viewModel.loadTerrainForEdit(terrainId)
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.loadCrops()
+    }
+
     LaunchedEffect(editTerrainState) {
         when (val s = editTerrainState) {
             is Resource.Success -> {

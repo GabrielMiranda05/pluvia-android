@@ -1,11 +1,11 @@
 ﻿package br.com.pluvia
 
 import android.app.Application
-import br.com.pluvia.data.remote.MockDataStore
+import br.com.pluvia.data.remote.AuthTokenStore
 
 class PluviaApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        MockDataStore.init(this)
+        AuthTokenStore.init(this)
     }
 }

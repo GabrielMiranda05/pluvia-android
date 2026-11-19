@@ -4,6 +4,13 @@
     alias(libs.plugins.kotlin.compose)
 }
 
+val envFile = rootProject.file(".env")
+val envProperties = java.util.Properties()
+if (envFile.exists()) {
+    envFile.inputStream().use { envProperties.load(it) }
+}
+val apiBaseUrl = envProperties.getProperty("API_BASE_URL", "http://10.0.2.2:5081/")
+
 android {
     namespace = "br.com.pluvia"
     compileSdk = 35
@@ -16,6 +23,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
 
     buildTypes {
@@ -36,6 +45,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

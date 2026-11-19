@@ -7,7 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import br.com.pluvia.data.remote.MockDataStore
+import br.com.pluvia.data.remote.AuthTokenStore
 import br.com.pluvia.ui.screen.AddTerrainScreen
 import br.com.pluvia.ui.screen.EditProfileScreen
 import br.com.pluvia.ui.screen.EditTerrainScreen
@@ -117,7 +117,7 @@ fun AppNavGraph(navController: NavHostController) {
             ProfileScreen(
                 viewModel = profileViewModel,
                 onLogout = {
-                    MockDataStore.setCurrentUserId(-1)
+                    AuthTokenStore.clear()
                     navController.navigate(NavRoutes.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }

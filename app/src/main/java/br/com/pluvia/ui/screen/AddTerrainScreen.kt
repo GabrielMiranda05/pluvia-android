@@ -99,6 +99,10 @@ fun AddTerrainScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.loadCrops()
+    }
+
     Scaffold(
         containerColor = BlueBackground,
         topBar = { AddTerrainTopBar() },

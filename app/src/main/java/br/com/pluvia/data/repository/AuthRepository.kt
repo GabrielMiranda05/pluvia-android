@@ -3,6 +3,7 @@
 import br.com.pluvia.data.model.AuthResponse
 import br.com.pluvia.data.model.LoginRequest
 import br.com.pluvia.data.model.RegisterRequest
+import br.com.pluvia.data.remote.AuthTokenStore
 import br.com.pluvia.data.remote.RetrofitClient
 import br.com.pluvia.util.Resource
 import com.google.gson.Gson
@@ -17,10 +18,11 @@ class AuthRepository {
         return try {
             val response = api.login(LoginRequest(email, password))
             if (response.isSuccessful && response.body() != null) {
-                Resource.Success(response.body()!!)
+                val auth = response.body()!!
+                auth.token?.let { AuthTokenStore.token = it }
+                Resource.Success(auth)
             } else {
-                val errorMsg = parseErrorMessage(response.errorBody()?.string(), "Credenciais inválidas")
-                Resource.Error(errorMsg)
+                Resource.Error(parseErrorMessage(response.errorBody()?.string(), "Credenciais inválidas"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Erro desconhecido")
@@ -29,23 +31,28 @@ class AuthRepository {
 
     suspend fun register(name: String, email: String, password: String): Resource<AuthResponse> {
         return try {
-            val response = api.register(RegisterRequest(name, email, password))
+            val response = api.register(RegisterRequest(name, email, password, password))
             if (response.isSuccessful && response.body() != null) {
-                Resource.Success(response.body()!!)
+                val loginResult = login(email, password)
+                if (loginResult is Resource.Success) loginResult
+                else Resource.Success(response.body()!!)
             } else {
-                val errorMsg = parseErrorMessage(response.errorBody()?.string(), "Erro ao criar conta")
-                Resource.Error(errorMsg)
+                Resource.Error(parseErrorMessage(response.errorBody()?.string(), "Erro ao criar conta"))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Erro desconhecido")
         }
     }
 
+    fun logout() {
+        AuthTokenStore.clear()
+    }
+
     private fun parseErrorMessage(errorBody: String?, fallback: String): String {
         return try {
             val json = gson.fromJson(errorBody, JsonObject::class.java)
-            json.get("error")?.asString ?: fallback
-        } catch (e: Exception) {
+            json.get("message")?.asString ?: json.get("error")?.asString ?: fallback
+        } catch (_: Exception) {
             fallback
         }
     }

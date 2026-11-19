@@ -3,8 +3,9 @@
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.pluvia.data.model.AddTerrainRequest
+import br.com.pluvia.data.model.Crop
 import br.com.pluvia.data.model.Terrain
-import br.com.pluvia.data.remote.MockDataStore
+import br.com.pluvia.data.model.UpdateTerrainRequest
 import br.com.pluvia.data.repository.TerrainRepository
 import br.com.pluvia.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +57,10 @@ class TerrainViewModel : ViewModel() {
     private val _longitude = MutableStateFlow("")
     val longitude: StateFlow<String> = _longitude
 
-    val cropTypes = listOf("Soja", "Milho", "Cana-de-açúcar", "Café", "Algodão", "Trigo", "Arroz", "Feijão")
+    private val _crops = MutableStateFlow<List<Crop>>(emptyList())
+    val crops: StateFlow<List<Crop>> = _crops
+
+    val cropTypes get() = _crops.value.map { it.type }
 
     fun onTerrainNameChange(value: String) {
         if (value.length <= 60) _terrainName.value = value
@@ -113,26 +117,42 @@ class TerrainViewModel : ViewModel() {
         }
     }
 
+    fun loadCrops() {
+        viewModelScope.launch {
+            val result = repository.getCrops()
+            if (result is Resource.Success) {
+                _crops.value = result.data
+                if (_crops.value.isNotEmpty() && _crops.value.none { it.type == _cropType.value }) {
+                    _cropType.value = _crops.value.first().type
+                }
+            }
+        }
+    }
+
     fun loadTerrainForEdit(terrainId: Int) {
-        val terrain = MockDataStore.getTerrainById(terrainId) ?: return
         _editingTerrainId.value = terrainId
-        _terrainName.value = terrain.name
-        _hectares.value = terrain.hectares.toString()
-        _cropType.value = terrain.cropType
-        _state.value = terrain.state
-        _city.value = terrain.city
-        _neighborhood.value = terrain.neighborhood
-        _street.value = terrain.street
-        _number.value = terrain.number
-        _latitude.value = terrain.latitude.toString()
-        _longitude.value = terrain.longitude.toString()
+        viewModelScope.launch {
+            val result = repository.getTerrain(terrainId)
+            if (result is Resource.Success) {
+                val terrain = result.data
+                _terrainName.value = terrain.name
+                _hectares.value = terrain.hectares.toString()
+                _cropType.value = terrain.cropType
+                _state.value = terrain.state
+                _city.value = terrain.city
+                _neighborhood.value = terrain.neighborhood
+                _street.value = terrain.street
+                _number.value = terrain.number
+                _latitude.value = terrain.latitude.toString()
+                _longitude.value = terrain.longitude.toString()
+            }
+        }
     }
 
     fun addTerrain() {
         viewModelScope.launch {
             _addTerrainState.value = Resource.Loading
-            val request = buildRequest()
-            _addTerrainState.value = repository.addTerrain(request)
+            _addTerrainState.value = repository.addTerrain(buildRequest())
         }
     }
 
@@ -140,23 +160,29 @@ class TerrainViewModel : ViewModel() {
         val id = _editingTerrainId.value ?: return
         viewModelScope.launch {
             _editTerrainState.value = Resource.Loading
-            val request = buildRequest()
+            val request = UpdateTerrainRequest(
+                name = _terrainName.value.takeIf { it.isNotBlank() },
+                hectares = _hectares.value.toDoubleOrNull()
+            )
             _editTerrainState.value = repository.updateTerrain(id, request)
         }
     }
 
-    private fun buildRequest() = AddTerrainRequest(
-        name = _terrainName.value,
-        hectares = _hectares.value.toDoubleOrNull() ?: 0.0,
-        cropType = _cropType.value,
-        state = _state.value,
-        city = _city.value,
-        neighborhood = _neighborhood.value,
-        street = _street.value,
-        number = _number.value,
-        latitude = _latitude.value.toDoubleOrNull() ?: 0.0,
-        longitude = _longitude.value.toDoubleOrNull() ?: 0.0
-    )
+    private fun buildRequest(): AddTerrainRequest {
+        val cropId = _crops.value.firstOrNull { it.type == _cropType.value }?.id ?: 1
+        return AddTerrainRequest(
+            cropId = cropId,
+            name = _terrainName.value,
+            hectares = _hectares.value.toDoubleOrNull() ?: 0.0,
+            state = _state.value,
+            city = _city.value,
+            neighborhood = _neighborhood.value.takeIf { it.isNotBlank() },
+            street = _street.value.takeIf { it.isNotBlank() },
+            number = _number.value.takeIf { it.isNotBlank() },
+            latitude = _latitude.value.toDoubleOrNull() ?: 0.0,
+            longitude = _longitude.value.toDoubleOrNull() ?: 0.0
+        )
+    }
 
     fun resetAddTerrainState() { _addTerrainState.value = null }
     fun resetEditTerrainState() { _editTerrainState.value = null }
