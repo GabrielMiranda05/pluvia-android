@@ -60,16 +60,36 @@ class TerrainViewModel : ViewModel() {
     private val _crops = MutableStateFlow<List<Crop>>(emptyList())
     val crops: StateFlow<List<Crop>> = _crops
 
+    private val _nameError = MutableStateFlow<String?>(null)
+    val nameError: StateFlow<String?> = _nameError
+
+    private val _hectaresError = MutableStateFlow<String?>(null)
+    val hectaresError: StateFlow<String?> = _hectaresError
+
+    private val _stateError = MutableStateFlow<String?>(null)
+    val stateError: StateFlow<String?> = _stateError
+
+    private val _cityError = MutableStateFlow<String?>(null)
+    val cityError: StateFlow<String?> = _cityError
+
+    private val _latitudeError = MutableStateFlow<String?>(null)
+    val latitudeError: StateFlow<String?> = _latitudeError
+
+    private val _longitudeError = MutableStateFlow<String?>(null)
+    val longitudeError: StateFlow<String?> = _longitudeError
+
     val cropTypes get() = _crops.value.map { it.type }
 
     fun onTerrainNameChange(value: String) {
         if (value.length <= 60) _terrainName.value = value
+        _nameError.value = null
     }
 
     fun onHectaresChange(value: String) {
         if (value.length <= 8 && value.matches(Regex("^\\d{0,6}(\\.\\d{0,2})?$"))) {
             _hectares.value = value
         }
+        _hectaresError.value = null
     }
 
     fun onCropTypeChange(value: String) { _cropType.value = value }
@@ -77,11 +97,13 @@ class TerrainViewModel : ViewModel() {
     fun onStateChange(value: String) {
         val filtered = value.filter { it.isLetter() || it == ' ' }
         if (filtered.length <= 2) _state.value = filtered.uppercase()
+        _stateError.value = null
     }
 
     fun onCityChange(value: String) {
         val filtered = value.filter { it.isLetter() || it == ' ' || it == '-' }
         if (filtered.length <= 50) _city.value = filtered
+        _cityError.value = null
     }
 
     fun onNeighborhoodChange(value: String) {
@@ -102,12 +124,52 @@ class TerrainViewModel : ViewModel() {
         if (value.length <= 10 && value.matches(Regex("^-?\\d{0,2}(\\.\\d{0,6})?$|^-$"))) {
             _latitude.value = value
         }
+        _latitudeError.value = null
     }
 
     fun onLongitudeChange(value: String) {
         if (value.length <= 11 && value.matches(Regex("^-?\\d{0,3}(\\.\\d{0,6})?$|^-$"))) {
             _longitude.value = value
         }
+        _longitudeError.value = null
+    }
+
+    private fun validateAddForm(): Boolean {
+        _nameError.value = if (_terrainName.value.isBlank()) "Informe o nome do terreno" else null
+        _hectaresError.value = if ((_hectares.value.toDoubleOrNull() ?: 0.0) <= 0.0) {
+            "Informe um valor de hectares maior que zero"
+        } else null
+        _stateError.value = if (_state.value.isBlank()) "Informe o estado (UF)" else null
+        _cityError.value = if (_city.value.isBlank()) "Informe a cidade" else null
+        _latitudeError.value = if (_latitude.value.toDoubleOrNull() == null) "Informe uma latitude válida" else null
+        _longitudeError.value = if (_longitude.value.toDoubleOrNull() == null) "Informe uma longitude válida" else null
+
+        return listOf(
+            _nameError.value,
+            _hectaresError.value,
+            _stateError.value,
+            _cityError.value,
+            _latitudeError.value,
+            _longitudeError.value
+        ).all { it == null }
+    }
+
+    private fun validateEditForm(): Boolean {
+        _nameError.value = if (_terrainName.value.isBlank()) "Informe o nome do terreno" else null
+        _hectaresError.value = if ((_hectares.value.toDoubleOrNull() ?: 0.0) <= 0.0) {
+            "Informe um valor de hectares maior que zero"
+        } else null
+
+        return _nameError.value == null && _hectaresError.value == null
+    }
+
+    private fun clearErrors() {
+        _nameError.value = null
+        _hectaresError.value = null
+        _stateError.value = null
+        _cityError.value = null
+        _latitudeError.value = null
+        _longitudeError.value = null
     }
 
     fun loadTerrains() {
@@ -131,6 +193,7 @@ class TerrainViewModel : ViewModel() {
 
     fun loadTerrainForEdit(terrainId: Int) {
         _editingTerrainId.value = terrainId
+        clearErrors()
         viewModelScope.launch {
             val result = repository.getTerrain(terrainId)
             if (result is Resource.Success) {
@@ -150,6 +213,10 @@ class TerrainViewModel : ViewModel() {
     }
 
     fun addTerrain() {
+        if (!validateAddForm()) {
+            _addTerrainState.value = Resource.Error("Corrija os campos destacados antes de salvar")
+            return
+        }
         viewModelScope.launch {
             _addTerrainState.value = Resource.Loading
             _addTerrainState.value = repository.addTerrain(buildRequest())
@@ -158,6 +225,10 @@ class TerrainViewModel : ViewModel() {
 
     fun updateTerrain() {
         val id = _editingTerrainId.value ?: return
+        if (!validateEditForm()) {
+            _editTerrainState.value = Resource.Error("Corrija os campos destacados antes de salvar")
+            return
+        }
         viewModelScope.launch {
             _editTerrainState.value = Resource.Loading
             val request = UpdateTerrainRequest(
@@ -199,5 +270,6 @@ class TerrainViewModel : ViewModel() {
         _number.value = ""
         _latitude.value = ""
         _longitude.value = ""
+        clearErrors()
     }
 }

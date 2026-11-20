@@ -141,23 +141,23 @@ MockDataStore (SharedPreferences)
 
 ---
 
-## 🔌 Camada de Dados Mock
+## 🔌 Camada de Dados
 
-Como o backend de IA ainda está em desenvolvimento, o app utiliza uma camada de mock completa que simula um servidor real:
+O app consome a API real do backend (`pluvia-backend`) via Retrofit, configurada por `API_BASE_URL` no `.env`.
 
-- **`MockInterceptor`** — intercepta todas as requisições Retrofit antes de chegarem à rede e retorna respostas JSON simuladas com códigos HTTP corretos (200, 401, 404, 409)
-- **`MockDataStore`** — singleton com estado em memória que persiste dados via `SharedPreferences`, simulando um banco de dados real. Suporta:
-  - Criação e autenticação de usuários
-  - CRUD completo de terrenos por usuário
-  - Geração de dados climáticos variados baseados em latitude, tipo de cultura e temperatura
-  - Cálculo de risco de incêndio com múltiplos fatores (temperatura, umidade, tipo de cultura, tamanho)
+### Usuário administrador pré-cadastrado
 
-### Usuários de teste pré-cadastrados
+O backend cria automaticamente um usuário `Admin` ao aplicar a migration `AddRolesAndSeedAdmin` (`dotnet ef database update`):
 
-| E-mail | Senha |
-|--------|-------|
-| `joao.pereira@pluvia.com.br` | `123456` |
-| `maria.silva@pluvia.com.br` | `123456` |
+| E-mail | Senha | Role |
+|--------|-------|------|
+| `admin@pluvia.local` | `Admin@123` | `Admin` |
+
+> Troque essa senha antes de qualquer ambiente que não seja local/dev. Para usuários comuns (`User`), não há seed — crie pela tela de cadastro do app (`POST /api/auth/register`).
+
+### Backend (`pluvia-backend`)
+
+O backend também usa um arquivo `.env` (em `Pluvia.WebApi/.env`), com um `.env.example` correspondente contendo `ConnectionStrings__DefaultConnection`, `JWT__Key/Issuer/Audience/ExpiresInMinutes` e `OPENWEATHER__APIKEY/BASEURL`. É necessário uma chave válida da [OpenWeatherMap](https://openweathermap.org/api) em `OPENWEATHER__APIKEY` para os terrenos receberem dados de clima reais — sem ela, cadastro e listagem de terrenos continuam funcionando normalmente, só ficam sem o histórico de previsão.
 
 ---
 
@@ -175,16 +175,21 @@ Como o backend de IA ainda está em desenvolvimento, o app utiliza uma camada de
 # 1. Clone o repositório
 git clone https://github.com/GabrielMMiranda/pluvia-android.git
 
-# 2. Abra no Android Studio
+# 2. Configure a URL da API
+cp .env.example .env
+# Edite .env se necessário — o padrão já aponta para o backend local
+# rodando em http://127.0.0.1:5081 (via alias de emulador 10.0.2.2)
+
+# 3. Abra no Android Studio
 # File > Open > selecione a pasta do projeto
 
-# 3. Aguarde o Gradle sync
+# 4. Aguarde o Gradle sync
 
-# 4. Execute no dispositivo/emulador
+# 5. Execute no dispositivo/emulador
 # Run > Run 'app'  (ou Shift+F10)
 ```
 
-> Não é necessária nenhuma configuração de API key ou variável de ambiente. O app funciona completamente offline com os dados mockados.
+> O app consome a API real definida em `API_BASE_URL` (arquivo `.env`, lido em `app/build.gradle.kts` e exposto via `BuildConfig.API_BASE_URL`). É necessário ter o backend (`pluvia-backend`) rodando localmente — use `10.0.2.2` em vez de `127.0.0.1` ao testar em emulador Android, pois `10.0.2.2` é o alias que o emulador usa para acessar o `localhost` da máquina host.
 
 ---
 

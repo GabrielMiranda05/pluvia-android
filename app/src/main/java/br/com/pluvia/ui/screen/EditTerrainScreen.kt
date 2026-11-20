@@ -76,6 +76,8 @@ fun EditTerrainScreen(
     val latitude by viewModel.latitude.collectAsState()
     val longitude by viewModel.longitude.collectAsState()
     val editTerrainState by viewModel.editTerrainState.collectAsState()
+    val nameError by viewModel.nameError.collectAsState()
+    val hectaresError by viewModel.hectaresError.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var dropdownExpanded by remember { mutableStateOf(false) }
@@ -135,7 +137,8 @@ fun EditTerrainScreen(
                 label = "Nome do terreno",
                 value = terrainName,
                 onValueChange = viewModel::onTerrainNameChange,
-                placeholder = "Sítio Boa Esperança"
+                placeholder = "Sítio Boa Esperança",
+                errorText = nameError
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -147,6 +150,7 @@ fun EditTerrainScreen(
                     onValueChange = viewModel::onHectaresChange,
                     placeholder = "42",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    errorText = hectaresError,
                     modifier = Modifier.weight(1f)
                 )
 

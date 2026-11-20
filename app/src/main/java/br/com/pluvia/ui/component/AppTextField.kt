@@ -19,6 +19,7 @@ import br.com.pluvia.ui.theme.BluePrimary
 import br.com.pluvia.ui.theme.BlueSurface
 import br.com.pluvia.ui.theme.GrayBorder
 import br.com.pluvia.ui.theme.GrayText
+import br.com.pluvia.ui.theme.RedLogout
 import br.com.pluvia.ui.theme.WhiteSurface
 
 @Composable
@@ -31,7 +32,8 @@ fun AppTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     trailingIcon: @Composable (() -> Unit)? = null,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    errorText: String? = null
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -53,6 +55,10 @@ fun AppTextField(
             keyboardOptions = keyboardOptions,
             trailingIcon = trailingIcon,
             singleLine = singleLine,
+            isError = errorText != null,
+            supportingText = errorText?.let {
+                { Text(text = it, color = RedLogout, style = MaterialTheme.typography.bodySmall) }
+            },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = BluePrimary,
@@ -60,7 +66,9 @@ fun AppTextField(
                 focusedContainerColor = WhiteSurface,
                 unfocusedContainerColor = BlueSurface,
                 cursorColor = BluePrimary,
-                focusedLabelColor = BluePrimary
+                focusedLabelColor = BluePrimary,
+                errorBorderColor = RedLogout,
+                errorContainerColor = WhiteSurface
             ),
             modifier = Modifier.fillMaxWidth()
         )

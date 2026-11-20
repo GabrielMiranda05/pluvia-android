@@ -80,6 +80,12 @@ fun AddTerrainScreen(
     val latitude by viewModel.latitude.collectAsState()
     val longitude by viewModel.longitude.collectAsState()
     val addTerrainState by viewModel.addTerrainState.collectAsState()
+    val nameError by viewModel.nameError.collectAsState()
+    val hectaresError by viewModel.hectaresError.collectAsState()
+    val stateError by viewModel.stateError.collectAsState()
+    val cityError by viewModel.cityError.collectAsState()
+    val latitudeError by viewModel.latitudeError.collectAsState()
+    val longitudeError by viewModel.longitudeError.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var dropdownExpanded by remember { mutableStateOf(false) }
@@ -135,7 +141,8 @@ fun AddTerrainScreen(
                 label = "Nome do terreno",
                 value = terrainName,
                 onValueChange = viewModel::onTerrainNameChange,
-                placeholder = "Sítio Boa Esperança"
+                placeholder = "Sítio Boa Esperança",
+                errorText = nameError
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -147,6 +154,7 @@ fun AddTerrainScreen(
                     onValueChange = viewModel::onHectaresChange,
                     placeholder = "42",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    errorText = hectaresError,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -210,6 +218,7 @@ fun AddTerrainScreen(
                         keyboardType = KeyboardType.Text,
                         capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Characters
                     ),
+                    errorText = stateError,
                     modifier = Modifier.weight(1f)
                 )
                 AppTextField(
@@ -221,6 +230,7 @@ fun AddTerrainScreen(
                         keyboardType = KeyboardType.Text,
                         capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Words
                     ),
+                    errorText = cityError,
                     modifier = Modifier.weight(2f)
                 )
             }
@@ -271,6 +281,7 @@ fun AddTerrainScreen(
                     onValueChange = viewModel::onLatitudeChange,
                     placeholder = "-21.1775",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    errorText = latitudeError,
                     modifier = Modifier.weight(1f)
                 )
                 AppTextField(
@@ -279,6 +290,7 @@ fun AddTerrainScreen(
                     onValueChange = viewModel::onLongitudeChange,
                     placeholder = "-47.8103",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    errorText = longitudeError,
                     modifier = Modifier.weight(1f)
                 )
             }

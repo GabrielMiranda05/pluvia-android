@@ -27,7 +27,3 @@ fun PluviaTheme(content: @Composable () -> Unit) {
         content = content
     )
 }
-
-// Alias de retrocompatibilidade — mantém compilação de quem ainda chama PluviaTheme
-@Composable
-fun PluviaTheme(content: @Composable () -> Unit) = PluviaTheme(content)

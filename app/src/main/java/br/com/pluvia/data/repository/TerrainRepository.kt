@@ -9,10 +9,13 @@ import br.com.pluvia.data.model.Terrain
 import br.com.pluvia.data.model.UpdateTerrainRequest
 import br.com.pluvia.data.remote.RetrofitClient
 import br.com.pluvia.util.Resource
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 
 class TerrainRepository {
 
     private val api = RetrofitClient.instance
+    private val gson = Gson()
 
     suspend fun getCrops(): Resource<List<Crop>> = try {
         val response = api.getCrops()
@@ -41,7 +44,9 @@ class TerrainRepository {
     suspend fun addTerrain(request: AddTerrainRequest): Resource<Terrain> = try {
         val response = api.addTerrain(request)
         if (response.isSuccessful && response.body() != null) Resource.Success(toTerrain(response.body()!!))
-        else Resource.Error(errorMessage(response.code(), "Erro ao cadastrar terreno"))
+        else Resource.Error(
+            parseErrorMessage(response.errorBody()?.string(), errorMessage(response.code(), "Erro ao cadastrar terreno"))
+        )
     } catch (e: Exception) {
         Resource.Error(e.message ?: "Erro desconhecido")
     }
@@ -49,7 +54,9 @@ class TerrainRepository {
     suspend fun updateTerrain(id: Int, request: UpdateTerrainRequest): Resource<Terrain> = try {
         val response = api.updateTerrain(id, request)
         if (response.isSuccessful && response.body() != null) Resource.Success(toTerrain(response.body()!!))
-        else Resource.Error(errorMessage(response.code(), "Erro ao atualizar terreno"))
+        else Resource.Error(
+            parseErrorMessage(response.errorBody()?.string(), errorMessage(response.code(), "Erro ao atualizar terreno"))
+        )
     } catch (e: Exception) {
         Resource.Error(e.message ?: "Erro desconhecido")
     }
@@ -96,5 +103,14 @@ class TerrainRepository {
         401 -> "Sessão expirada. Faça login novamente"
         404 -> "Terreno não encontrado"
         else -> fallback
+    }
+
+    private fun parseErrorMessage(errorBody: String?, fallback: String): String {
+        return try {
+            val json = gson.fromJson(errorBody, JsonObject::class.java)
+            json.get("message")?.asString ?: json.get("error")?.asString ?: fallback
+        } catch (_: Exception) {
+            fallback
+        }
     }
 }
